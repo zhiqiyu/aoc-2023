@@ -12,7 +12,7 @@ class Mapping(val records: List<Record>) {
     }
 }
 
-class Plan(val seeds: List<Long>, val input: List<String>) {
+class Plan(val input: List<String>) {
     val s2sMap: Mapping
     val s2fMap: Mapping
     val f2wMap: Mapping
@@ -48,9 +48,9 @@ fun main() {
     fun part1(input: List<String>): Long {
         var match = Regex("""seeds:((\s+\d+)*)""").find(input[0])!!.groupValues
         val seeds = match[1].trim().split(' ').map { it.trim().toLong() }
-        val p = Plan(seeds, input)
+        val p = Plan(input)
         var loc = Long.MAX_VALUE
-        for (s in p.seeds) {
+        for (s in seeds) {
             loc = Math.min(loc, p.getLocation(s))
         }
         return loc
@@ -58,16 +58,17 @@ fun main() {
 
     fun part2(input: List<String>): Long {
         var match = Regex("""seeds:((\s+\d+)*)""").find(input[0])!!.groupValues
-        val seeds = match[1].trim().split(' ').map { it.trim().toLong() }
-        val seedRange = mutableListOf<Long>()
-        for (i in seeds.indices step 2) {
-            for (j in seeds[i]..seeds[i]+seeds[i+1]-1) {
-                seedRange.add(j)
+        val seedRanges = match[1].trim().split(' ').map { it.trim().toLong() }
+        val seeds = sequence {
+            for (i in seedRanges.indices step 2) {
+                yieldAll(generateSequence(seedRanges[i]) { 
+                    it + 1 
+                }.takeWhile({ it -> it < seedRanges[i] + seedRanges[i+1]-1 }))
             }
-        }
-        val p = Plan(seedRange, input)
+        }   
+        val p = Plan(input)
         var loc = Long.MAX_VALUE
-        for (s in p.seeds) {
+        for (s in seeds) {
             loc = Math.min(loc, p.getLocation(s))
         }
         println(loc)
@@ -76,10 +77,10 @@ fun main() {
 
     val testInput = readInput("Day05_test")
 
-    // check(part1(testInput) == 35L)
-    // check(part2(testInput) == 46L)
+    check(part1(testInput) == 35L)
+    check(part2(testInput) == 46L)
 
     val input = readInput("Day05")
-    // part1(input).println()
+    part1(input).println()
     part2(input).println()
 }
