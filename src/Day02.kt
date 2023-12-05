@@ -48,8 +48,6 @@ class Game(val input: String) {
 }
 
 fun main() {
-    
-
     fun part1(input: List<String>, set: Draw): Int {
         return input.map { line -> Game(line) }.filter {
             game -> game.checkPossible(set)
